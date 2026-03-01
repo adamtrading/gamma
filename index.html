@@ -865,11 +865,12 @@ td.strike-cell:hover::after { opacity: 1; }
   <div class="masthead">
     <div class="masthead-left">
       <div class="sys-label">Quantum Field Ladder // MotiveWave Bridge</div>
-      <h1>GEX <span>→ MW</span></h1>
+      <h1>GEX <span>→ MotiveWave</span></h1>
       <div class="tagline">Cloud levels converter with gradient simulation</div>
     </div>
     <div class="masthead-right">
       <div class="version-tag">v4.0.0</div>
+      <a href="instructions.html" style="display:block;margin-top:8px;font-size:10px;color:var(--text2);text-decoration:none;text-align:right;opacity:0.7;transition:opacity 0.15s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">How to use →</a>
     </div>
   </div>
 
@@ -983,7 +984,16 @@ td.strike-cell:hover::after { opacity: 1; }
               oninput="document.getElementById('minStrVal').textContent=this.value;reparse()">
             <div class="ctrl-hints"><span>0 all</span><span>3 med</span><span>5 max only</span></div>
           </div>
-          <div class="hint-chip hint">⚡ Filters out weak levels before export</div>
+          <div class="ctrl">
+            <div class="ctrl-row">
+              <span class="ctrl-name">Max Strength</span>
+              <span class="ctrl-val" id="maxStrVal">5</span>
+            </div>
+            <input type="range" id="maxStrength" min="0" max="5" step="1" value="5"
+              oninput="document.getElementById('maxStrVal').textContent=this.value;reparse()">
+            <div class="ctrl-hints"><span>0 weakest only</span><span>5 all</span></div>
+          </div>
+          <div class="hint-chip hint">⚡ Filters levels to a strength range</div>
         </div>
       </div>
 
@@ -1109,7 +1119,9 @@ function parseGex(raw){
 
 function filteredLevels(levels){
   const min=parseInt(document.getElementById('minStrength').value);
-  return levels.filter(l=>l.kind==='ZG'||l.strength>=min);
+  const maxEl=document.getElementById('maxStrength');
+  const max=maxEl?parseInt(maxEl.value):5;
+  return levels.filter(l=>l.kind==='ZG'||(l.strength>=min&&l.strength<=max));
 }
 
 // ── Color ──────────────────────────────────────────
