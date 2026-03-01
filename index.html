@@ -1,1 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEX → MotiveWave</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Core palette */
+  --bg:        #06080f;
+  --bg2:       #080c16;
+  --surface:   rgba(255,255,255,0.04);
+  --surface2:  rgba(255,255,255,0.07);
+  --glass:     rgba(255,255,255,0.055);
+  --glass2:    rgba(255,255,255,0.09);
 
+  /* Borders */
+  --border:    rgba(255,255,255,0.09);
+  --border2:   rgba(255,255,255,0.15);
+  --border-hi: rgba(255,255,255,0.22);
+
+  /* Accents */
+  --teal:      #00d4aa;
+  --teal2:     #00ffcc;
+  --violet:    #7c6fff;
+  --violet2:   #a78bfa;
+  --rose:      #f43f6e;
+  --rose2:     #fb7185;
+  --amber:     #f59e0b;
+  --amber2:    #fcd34d;
+  --blue:      #60a5fa;
+
+  /* Text */
+  --text:      #e2e8f4;
+  --text2:     #8892a4;
+  --text3:     #3d4a60;
+  --text4:     #1e2535;
+
+  /* Glow */
+  --glow-t:    rgba(0,212,170,0.18);
+  --glow-v:    rgba(124,111,255,0.18);
+  --glow-r:    rgba(244,63,110,0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Animated background ──────────────────────────── */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.28;
+  animation: orbDrift 18s ease-in-out infinite alternate;
+}
+.bg-orb1 { width: 600px; height: 600px; background: radial-gradient(circle, #7c6fff55, transparent 70%); top: -200px; left: -150px; animation-delay: 0s; }
+.bg-orb2 { width: 500px; height: 500px; background: radial-gradient(circle, #00d4aa44, transparent 70%); bottom: -100px; right: -100px; animation-delay: -6s; }
+.bg-orb3 { width: 400px; height: 400px; background: radial-gradient(circle, #f43f6e33, transparent 70%); top: 40%; left: 55%; animation-delay: -12s; }
+
+@keyframes orbDrift {
+  0%   { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(40px,-30px) scale(1.05); }
+  66%  { transform: translate(-20px,40px) scale(0.95); }
+  100% { transform: translate(30px,20px) scale(1.02); }
+}
+
+/* Subtle grid overlay */
+.bg-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 44px 24px 100px;
+}
+
+/* ── Header ───────────────────────────────────────── */
+.masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 44px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sys-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.8;
+}
+.sys-label::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 10px var(--teal), 0 0 24px var(--teal);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+
+h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+h1 span {
+  background: linear-gradient(135deg, var(--teal2), var(--violet2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tagline { font-size: 12px; color: var(--text2); letter-spacing: 0.01em; font-weight: 400; }
+
+.masthead-right { text-align: right; padding-top: 6px; }
+.version-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  letter-spacing: 0.08em;
+  background: var(--surface);
+}
+
+/* ── Two-column layout ────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+
+/* ── Glass Panels ─────────────────────────────────── */
+.panel {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.08) inset,
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 20px 60px rgba(0,0,0,0.35),
+    0 4px 16px rgba(0,0,0,0.25);
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.panel:last-child { margin-bottom: 0; }
+.panel:hover {
+  border-color: var(--border2);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 24px 72px rgba(0,0,0,0.4),
+    0 6px 20px rgba(0,0,0,0.3);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+}
+.panel-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-title-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
+.panel-body { padding: 18px; }
+
+/* ── Instrument pills ─────────────────────────────── */
+.inst-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+.inst-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(12px);
+}
+.inst-btn:hover {
+  border-color: var(--border-hi);
+  color: var(--text);
+  background: var(--surface2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.inst-btn.active {
+  background: rgba(124,111,255,0.15);
+  border-color: rgba(124,111,255,0.45);
+  color: var(--violet2);
+  box-shadow: 0 0 20px rgba(124,111,255,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* ── Textarea ─────────────────────────────────────── */
+textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 14px 16px;
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1.65;
+  margin-top: 12px;
+  backdrop-filter: blur(8px);
+}
+textarea:focus {
+  border-color: rgba(0,212,170,0.5);
+  box-shadow: 0 0 0 3px rgba(0,212,170,0.1), 0 0 20px rgba(0,212,170,0.08);
+}
+textarea::placeholder { color: var(--text3); }
+
+/* ── Buttons ──────────────────────────────────────── */
+.btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.btn-cyan {
+  background: linear-gradient(135deg, var(--teal), #00b896);
+  color: #000;
+  box-shadow: 0 4px 16px rgba(0,212,170,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.btn-cyan:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,212,170,0.45), 0 1px 0 rgba(255,255,255,0.2) inset;
+  filter: brightness(1.05);
+}
+.btn-outline {
+  background: var(--surface);
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  backdrop-filter: blur(12px);
+}
+.btn-outline:hover {
+  border-color: var(--border-hi);
+  color: var(--text);
+  background: var(--surface2);
+  transform: translateY(-1px);
+}
+.btn-amber {
+  background: linear-gradient(135deg, var(--amber), #d97706);
+  color: #000;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.btn-amber:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(245,158,11,0.45);
+}
+.btn-pink {
+  background: linear-gradient(135deg, var(--rose), #e11d48);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(244,63,110,0.35), 0 1px 0 rgba(255,255,255,0.15) inset;
+}
+.btn-pink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(244,63,110,0.45);
+}
+
+/* ── Slider ───────────────────────────────────────── */
+.ctrl { margin-bottom: 16px; }
+.ctrl:last-child { margin-bottom: 0; }
+.ctrl-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.ctrl-name { font-size: 11px; color: var(--text2); font-weight: 500; }
+.ctrl-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--teal);
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+  min-width: 38px;
+  text-align: center;
+}
+input[type=range] {
+  width: 100%;
+  accent-color: var(--teal);
+  cursor: pointer;
+  height: 4px;
+}
+.ctrl-hints { display: flex; justify-content: space-between; font-size: 9px; color: var(--text3); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── Toggle ───────────────────────────────────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-row:hover { border-color: var(--border2); background: var(--surface2); }
+.toggle-row:last-child { margin-bottom: 0; }
+.toggle-label { font-size: 12px; color: var(--text); font-weight: 500; }
+.toggle-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.sw { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+.sw input { opacity: 0; width: 0; height: 0; }
+.sw-track {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border2);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.sw-track::after {
+  content: '';
+  position: absolute;
+  left: 3px; top: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--text2);
+  transition: all 0.25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.sw input:checked + .sw-track {
+  background: rgba(0,212,170,0.25);
+  border-color: rgba(0,212,170,0.5);
+  box-shadow: 0 0 10px rgba(0,212,170,0.2);
+}
+.sw input:checked + .sw-track::after {
+  left: 19px;
+  background: var(--teal2);
+  box-shadow: 0 0 8px var(--teal);
+}
+
+/* ── BG swatches ──────────────────────────────────── */
+.swatch-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+input[type=color] { width: 32px; height: 28px; border: 1px solid var(--border2); border-radius: 8px; background: none; cursor: pointer; padding: 2px; }
+.swatch {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+}
+.swatch:hover { border-color: var(--border-hi); color: var(--text2); background: var(--surface2); }
+.swatch.active { border-color: rgba(0,212,170,0.5); color: var(--teal); background: rgba(0,212,170,0.08); }
+
+/* ── Stats strip ──────────────────────────────────── */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+@media (max-width: 500px) { .stats-strip { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 16px;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.08) inset,
+    0 12px 40px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset, 0 16px 50px rgba(0,0,0,0.35); }
+.stat-num {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 5px;
+  letter-spacing: -0.03em;
+}
+.stat-lbl {
+  font-size: 9px;
+  color: var(--text3);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Table ────────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 11px; }
+thead tr { background: rgba(0,0,0,0.2); }
+th {
+  text-align: left;
+  padding: 9px 14px;
+  color: var(--text3);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-family: 'JetBrains Mono', monospace;
+  transition: background 0.1s;
+}
+tr:last-child td { border-bottom: none; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-family: 'Inter', sans-serif;
+}
+.badge-wall {
+  background: rgba(244,63,110,0.12);
+  color: var(--rose2);
+  border: 1px solid rgba(244,63,110,0.25);
+}
+.badge-mag {
+  background: rgba(0,212,170,0.12);
+  color: var(--teal2);
+  border: 1px solid rgba(0,212,170,0.25);
+}
+.badge-zg {
+  background: rgba(124,111,255,0.1);
+  color: var(--violet2);
+  border: 1px solid rgba(124,111,255,0.2);
+}
+
+/* ── Strength bars ────────────────────────────────── */
+.str-bar { display: flex; gap: 3px; }
+.str-seg {
+  width: 6px; height: 16px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.07);
+}
+.str-seg.on {
+  background: linear-gradient(180deg, var(--amber2), var(--amber));
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 6px rgba(245,158,11,0.4);
+}
+.str-seg.on::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: seg-sweep 1.8s ease-in-out infinite;
+}
+.str-seg.on:nth-child(1)::after { animation-delay: 0s; }
+.str-seg.on:nth-child(2)::after { animation-delay: 0.1s; }
+.str-seg.on:nth-child(3)::after { animation-delay: 0.2s; }
+.str-seg.on:nth-child(4)::after { animation-delay: 0.3s; }
+.str-seg.on:nth-child(5)::after { animation-delay: 0.4s; }
+
+@keyframes seg-sweep {
+  0%   { left: -100%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { left: 150%; opacity: 0; }
+  100% { left: 150%; opacity: 0; }
+}
+
+/* ── Panel entrance animations ────────────────────── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.panel-animate {
+  animation: fadeSlideIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+  opacity: 0;
+}
+
+/* ── Row gradient tints ───────────────────────────── */
+tbody tr { cursor: pointer; user-select: none; }
+tbody tr.row-wall td   { background: rgba(244,63,110,0.025); }
+tbody tr.row-mag td    { background: rgba(0,212,170,0.025); }
+tbody tr.row-zg td     { background: rgba(124,111,255,0.025); }
+tbody tr:hover td      { background: rgba(255,255,255,0.04) !important; }
+tbody tr.sel td {
+  background: rgba(0,212,170,0.08) !important;
+}
+tbody tr.sel td:first-child {
+  border-left: 2px solid var(--teal);
+  padding-left: 12px;
+}
+
+/* ── Strike click-to-copy ─────────────────────────── */
+td.strike-cell { cursor: copy; position: relative; font-weight: 600; color: var(--text); }
+td.strike-cell:hover { color: var(--teal) !important; }
+td.strike-cell::after {
+  content: '⎘';
+  position: absolute;
+  right: 6px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px; color: var(--text3);
+  opacity: 0; transition: opacity 0.15s;
+}
+td.strike-cell:hover::after { opacity: 1; }
+
+/* ── Hover tooltip ────────────────────────────────── */
+.tip {
+  position: fixed;
+  z-index: 9000;
+  background: rgba(12,16,28,0.92);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 12px 15px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--text2);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px) scale(0.97);
+  transition: opacity 0.18s, transform 0.18s;
+  min-width: 180px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset;
+  backdrop-filter: blur(24px);
+  line-height: 1.9;
+}
+.tip.show { opacity: 1; transform: translateY(0) scale(1); }
+.tip-strike {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.tip-row { display: flex; justify-content: space-between; gap: 16px; }
+.tip-lbl { color: var(--text3); font-size: 10px; }
+.tip-val { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.tip-val.cyan  { color: var(--teal2); }
+.tip-val.pink  { color: var(--rose2); }
+.tip-val.amber { color: var(--amber2); }
+.tip-val.fog   { color: var(--violet2); }
+
+/* ── Select by type bar ───────────────────────────── */
+.type-sel-row { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+.type-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 600;
+  padding: 5px 11px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+}
+.type-btn.tb-all:hover   { border-color: rgba(96,165,250,0.5); color: var(--blue); background: rgba(96,165,250,0.1); }
+.type-btn.tb-wall:hover  { border-color: rgba(244,63,110,0.5); color: var(--rose2); background: rgba(244,63,110,0.1); }
+.type-btn.tb-mag:hover   { border-color: rgba(0,212,170,0.5); color: var(--teal2); background: rgba(0,212,170,0.1); }
+.type-btn.tb-zg:hover    { border-color: rgba(124,111,255,0.5); color: var(--violet2); background: rgba(124,111,255,0.1); }
+.type-btn.tb-none:hover  { border-color: var(--border2); color: var(--text2); background: var(--surface2); }
+
+/* ── Copy CSV pulse ───────────────────────────────── */
+@keyframes btnPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(244,63,110,0.6), 0 4px 16px rgba(244,63,110,0.35); }
+  60%  { box-shadow: 0 0 0 10px rgba(244,63,110,0), 0 4px 16px rgba(244,63,110,0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(244,63,110,0), 0 4px 16px rgba(244,63,110,0.35); }
+}
+.btn-copy-pulse { animation: btnPulse 0.6s ease; }
+
+/* ── Selection bar ────────────────────────────────── */
+.sel-bar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0,212,170,0.07);
+  border: 1px solid rgba(0,212,170,0.2);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  color: var(--teal2);
+  backdrop-filter: blur(8px);
+}
+.sel-bar.visible { display: flex; }
+.sel-count { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.sel-hint { color: var(--text3); font-size: 10px; flex: 1; }
+.btn-sel {
+  background: linear-gradient(135deg, var(--teal), #00b896);
+  color: #000;
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0,212,170,0.3);
+  transition: all 0.15s;
+}
+.btn-sel:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,170,0.4); }
+.btn-sel-clear {
+  background: transparent;
+  color: var(--text3);
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.btn-sel-clear:hover { border-color: var(--border-hi); color: var(--text2); }
+
+/* ── CSV mode tag ─────────────────────────────────── */
+.csv-mode-tag {
+  display: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--teal2);
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.25);
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.05em;
+}
+.csv-mode-tag.visible { display: inline; }
+
+/* ── Output box ───────────────────────────────────── */
+.out-box {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 200px;
+  overflow-y: auto;
+  color: rgba(0,255,204,0.65);
+  backdrop-filter: blur(8px);
+}
+
+/* ── URL export ───────────────────────────────────── */
+.url-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: stretch;
+}
+.url-input {
+  flex: 1;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 9px 13px;
+  outline: none;
+  min-width: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  backdrop-filter: blur(8px);
+}
+.url-input:focus {
+  border-color: rgba(0,212,170,0.4);
+  box-shadow: 0 0 0 3px rgba(0,212,170,0.08);
+}
+.url-input::placeholder { color: var(--text3); }
+
+/* ── Hint text ────────────────────────────────────── */
+.hint { font-size: 10px; color: var(--text3); margin-top: 8px; line-height: 1.55; font-family: 'Inter', sans-serif; }
+.hint-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(0,212,170,0.06);
+  border: 1px solid rgba(0,212,170,0.15);
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--teal);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Toast ────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: rgba(12,16,28,0.92);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 11px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.06) inset;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition: all 0.28s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: auto;
+  backdrop-filter: blur(24px);
+}
+.toast.show { opacity: 1; transform: translateY(0) scale(1); }
+
+/* ── Divider ──────────────────────────────────────── */
+.div { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ── Collapse ─────────────────────────────────────── */
+.coll-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 4px 10px;
+  line-height: 1;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  letter-spacing: 0.02em;
+}
+.coll-btn:hover {
+  color: var(--text2);
+  border-color: var(--border);
+  background: var(--surface);
+}
+.coll { overflow: hidden; transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1); max-height: 2000px; }
+.coll.shut { max-height: 0; }
+
+/* ── Filter row ───────────────────────────────────── */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(245,158,11,0.05);
+  border: 1px solid rgba(245,158,11,0.15);
+  margin-bottom: 8px;
+}
+.filter-label { font-size: 11px; color: var(--amber); font-weight: 600; white-space: nowrap; }
+.filter-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-left: auto; }
+
+/* ── Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+<div class="bg-canvas">
+  <div class="bg-orb bg-orb1"></div>
+  <div class="bg-orb bg-orb2"></div>
+  <div class="bg-orb bg-orb3"></div>
+</div>
+<div class="shell">
+
+  <!-- Masthead -->
+  <div class="masthead">
+    <div class="masthead-left">
+      <div class="sys-label">Quantum Field Ladder // MotiveWave Bridge</div>
+      <h1>GEX <span>→ MW</span></h1>
+      <div class="tagline">Cloud levels converter with gradient simulation</div>
+    </div>
+    <div class="masthead-right">
+      <div class="version-tag">v4.0.0</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Left column -->
+    <div>
+
+      <!-- Input panel -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--blue);color:var(--blue)"></span>Instrument &amp; Data</div>
+        </div>
+        <div class="panel-body">
+          <div class="inst-grid">
+            <button class="inst-btn active" onclick="setInstrument('NQ',this)">NQ</button>
+            <button class="inst-btn" onclick="setInstrument('MNQ',this)">MNQ</button>
+            <button class="inst-btn" onclick="setInstrument('ES',this)">ES</button>
+            <button class="inst-btn" onclick="setInstrument('MES',this)">MES</button>
+          </div>
+          <textarea id="rawInput" placeholder="Paste GEX data string here…"></textarea>
+          <div class="btn-row">
+            <button class="btn btn-cyan" onclick="parse()">Convert</button>
+            <button class="btn btn-outline" onclick="loadSample()">Sample</button>
+            <button class="btn btn-outline" onclick="clearAll()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-strip" id="statsBar" style="display:none">
+        <div class="stat"><div class="stat-num" style="color:var(--text)" id="statTotal">0</div><div class="stat-lbl">Levels</div></div>
+        <div class="stat"><div class="stat-num" style="color:var(--rose2)" id="statWalls">0</div><div class="stat-lbl">Walls</div></div>
+        <div class="stat"><div class="stat-num" style="color:var(--teal2)" id="statMagnets">0</div><div class="stat-lbl">Magnets</div></div>
+        <div class="stat"><div class="stat-num" style="color:var(--violet2)" id="statRows">0</div><div class="stat-lbl">CSV Rows</div></div>
+      </div>
+
+
+
+      <!-- Parsed table -->
+      <div class="panel" id="tableSection" style="display:none">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--text3)"></span>Parsed Levels <span id="levelCount" style="color:var(--text3);margin-left:6px"></span></div>
+          <button class="coll-btn" id="tableToggle" onclick="toggleColl('tableBody','tableToggle')">▲ hide</button>
+        </div>
+        <div class="coll" id="tableBody">
+          <div style="padding:8px 16px 4px">
+            <div class="type-sel-row" id="typeSelRow" style="display:none">
+              <button class="type-btn tb-all"  onclick="selectByType('all')">All</button>
+              <button class="type-btn tb-wall" onclick="selectByType('wall')">Walls</button>
+              <button class="type-btn tb-mag"  onclick="selectByType('mag')">Magnets</button>
+              <button class="type-btn tb-zg"   onclick="selectByType('zg')">ZG</button>
+              <button class="type-btn tb-none" onclick="selectByType('none')">None</button>
+            </div>
+            <div class="sel-bar" id="selBar">
+              <span class="sel-count" id="selCount">0</span>&nbsp;selected
+              <span class="sel-hint">Hover for details · Click strike to copy · Shift+click range</span>
+              <button class="btn-sel-clear" onclick="clearSelection()">Clear</button>
+              <button class="btn-sel" onclick="exportSelectionOnly()">⬇ Download Selected</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Strike</th><th>Type</th><th>Str</th><th>Top</th><th>Bottom</th><th>Label</th></tr></thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="panel" id="outputSection" style="display:none">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--teal)"></span>CSV Output<span class="csv-mode-tag" id="csvModeTag">SELECTION</span></div>
+          <button class="coll-btn" id="outputToggle" onclick="toggleColl('outputBody','outputToggle')">▲ hide</button>
+        </div>
+        <div class="coll" id="outputBody">
+          <div style="padding:12px 16px 16px">
+            <div class="out-box" id="outputBox"></div>
+            <div class="btn-row">
+              <button class="btn btn-pink" id="copyCsvBtn" onclick="copyOutput()">Copy CSV</button>
+              <button class="btn btn-amber" onclick="exportCSV()">⬇ Download</button>
+            </div>
+            <div class="div"></div>
+            <div style="font-size:10px;color:var(--text2);margin-bottom:6px;font-family:'Space Mono',monospace;">MOTIVEWAVE DIRECT IMPORT URL</div>
+            <div class="url-row">
+              <input class="url-input" id="urlInput" placeholder="Paste your Dropbox / GitHub raw URL here…" />
+              <button class="btn btn-outline" onclick="copyUrl()" style="white-space:nowrap;font-size:11px;padding:8px 12px">Copy URL</button>
+            </div>
+            <div class="hint" style="margin-top:6px">Paste this URL into MotiveWave → Add Study → Cloud Levels → URL field for live auto-reload.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right column: settings -->
+    <div>
+
+      <!-- Strength filter -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--amber)"></span>Filters</div>
+        </div>
+        <div class="panel-body">
+          <div class="ctrl">
+            <div class="ctrl-row">
+              <span class="ctrl-name">Min Strength</span>
+              <span class="ctrl-val" id="minStrVal">0</span>
+            </div>
+            <input type="range" id="minStrength" min="0" max="5" step="1" value="0"
+              oninput="document.getElementById('minStrVal').textContent=this.value;reparse()">
+            <div class="ctrl-hints"><span>0 all</span><span>3 med</span><span>5 max only</span></div>
+          </div>
+          <div class="hint-chip hint">⚡ Filters out weak levels before export</div>
+        </div>
+      </div>
+
+      <!-- Band settings -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--blue)"></span>Band</div>
+        </div>
+        <div class="panel-body">
+          <div class="ctrl">
+            <div class="ctrl-row">
+              <span class="ctrl-name">Field Scale</span>
+              <span class="ctrl-val" id="fieldScaleVal">0.5</span>
+            </div>
+            <input type="range" id="fieldScale" min="0.2" max="1.5" step="0.1" value="0.5"
+              oninput="document.getElementById('fieldScaleVal').textContent=parseFloat(this.value).toFixed(1);reparse()">
+            <div class="ctrl-hints"><span>0.2</span><span>0.5 def</span><span>1.5</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Labels -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--text3)"></span>Labels</div>
+        </div>
+        <div class="panel-body">
+          <label class="toggle-row">
+            <div><div class="toggle-label">Centre label</div><div class="toggle-sub">"25200 WALL" on each level</div></div>
+            <label class="sw"><input type="checkbox" id="showCenterLabel" checked onchange="reparse()"><span class="sw-track"></span></label>
+          </label>
+          <label class="toggle-row" style="margin-bottom:0">
+            <div><div class="toggle-label">Band edge prices</div><div class="toggle-sub">Top &amp; bottom price markers</div></div>
+            <label class="sw"><input type="checkbox" id="showBandEdges" onchange="reparse()"><span class="sw-track"></span></label>
+          </label>
+        </div>
+      </div>
+
+      <!-- Gradient -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="panel-title-dot" style="background:var(--violet2)"></span>Gradient</div>
+          <label class="sw"><input type="checkbox" id="gradientEnabled" checked onchange="reparse()"><span class="sw-track"></span></label>
+        </div>
+        <div class="panel-body">
+          <div class="ctrl">
+            <div class="ctrl-row"><span class="ctrl-name">Outer Transparency</span><span class="ctrl-val" id="alphaOuterVal">95</span></div>
+            <input type="range" id="alphaOuter" min="80" max="98" step="1" value="95"
+              oninput="document.getElementById('alphaOuterVal').textContent=this.value;reparse()">
+            <div class="ctrl-hints"><span>80 visible</span><span>98 clear</span></div>
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-row"><span class="ctrl-name">Inner Transparency</span><span class="ctrl-val" id="alphaInnerVal">40</span></div>
+            <input type="range" id="alphaInner" min="10" max="70" step="1" value="40"
+              oninput="document.getElementById('alphaInnerVal').textContent=this.value;reparse()">
+            <div class="ctrl-hints"><span>10 solid</span><span>70 faded</span></div>
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-row"><span class="ctrl-name">Smoothness</span><span class="ctrl-val" id="gradientStepsVal">30</span></div>
+            <input type="range" id="gradientSteps" min="10" max="50" step="1" value="30"
+              oninput="document.getElementById('gradientStepsVal').textContent=this.value;reparse()">
+            <div class="ctrl-hints"><span>10 basic</span><span>30 def</span><span>50 ultra</span></div>
+          </div>
+          <div class="div"></div>
+          <div class="ctrl-row" style="margin-bottom:6px">
+            <span class="ctrl-name">Chart Background</span>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3)" id="bgHexLabel">#131722</span>
+          </div>
+          <div class="swatch-row">
+            <input type="color" id="bgColor" value="#131722" oninput="document.getElementById('bgHexLabel').textContent=this.value;reparse()">
+            <button onclick="setBg('#131722',this)" class="swatch active">#131722</button>
+            <button onclick="setBg('#0d1117',this)" class="swatch">#0d1117</button>
+            <button onclick="setBg('#1a1a2e',this)" class="swatch">#1a1a2e</button>
+            <button onclick="setBg('#000000',this)" class="swatch">#000000</button>
+            <button onclick="setBg('#ffffff',this)" class="swatch">#fff</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="tip" id="tip"></div>
+
+<script>
+const SAMPLE=`25200,5,0,25206.9,25193.1,CW,Wall (Call Wall)~L↑: 25206.9~L↓: 25193.1~Range: 14pt~Call: 310.96M~Put: 25.43M;25000,3,1,25006.2,24993.8,PW,Magnet (Attractor)~L↑: 25006.2~L↓: 24993.8~Range: 12pt~Call: 63.05M~Put: 67.02M;24900,2,0,24905.7,24894.3,PW,Wall (Put Wall)~L↑: 24905.7~L↓: 24894.3~Range: 11pt~Call: 19.44M~Put: 48.88M;25300,2,0,25305.7,25294.3,CW,Wall (Call Wall)~L↑: 25305.7~L↓: 25294.3~Range: 11pt~Call: 50.99M~Put: 16.13M;24950,2,1,24955.6,24944.4,CW,Magnet (Attractor)~L↑: 24955.6~L↓: 24944.4~Range: 11pt~Call: 31.71M~Put: 30.19M;24800,2,1,24805.5,24794.5,CW,Magnet (Attractor)~L↑: 24805.5~L↓: 24794.5~Range: 11pt~Call: 26.97M~Put: 25.70M;25050,2,0,25055.5,25044.5,CW,Wall (Call Wall)~L↑: 25055.5~L↓: 25044.5~Range: 11pt~Call: 34.70M~Put: 16.32M;25150,2,0,25155.4,25144.6,CW,Wall (Call Wall)~L↑: 25155.4~L↓: 25144.6~Range: 11pt~Call: 35.80M~Put: 12.79M;24850,2,1,24855.4,24844.6,PW,Magnet (Attractor)~L↑: 24855.4~L↓: 24844.6~Range: 11pt~Call: 18.69M~Put: 27.18M;24700,2,0,24705.3,24694.7,PW,Wall (Put Wall)~L↑: 24705.3~L↓: 24694.7~Range: 11pt~Call: 10.57M~Put: 32.52M;25250,2,0,25255.2,25244.8,CW,Wall (Call Wall)~L↑: 25255.2~L↓: 25244.8~Range: 10pt~Call: 30.63M~Put: 7.38M;24750,2,0,24755.1,24744.9,PW,Wall (Put Wall)~L↑: 24755.1~L↓: 24744.9~Range: 10pt~Call: 3.12M~Put: 29.31M;24650,1,0,24654.8,24645.2,PW,Wall (Put Wall)~L↑: 24654.8~L↓: 24645.2~Range: 10pt~Call: 8.01M~Put: 13.40M;24880,1,0,24884.8,24875.2,PW,Wall (Put Wall)~L↑: 24884.8~L↓: 24875.2~Range: 10pt~Call: 0~Put: 20.58M;24927,1,0,24932.2,24922.8,PW,Wall (Put Wall)~L↑: 24932.2~L↓: 24922.8~Range: 9pt~Call: 4.18M~Put: 15.19M;24600,1,0,24604.7,24595.3,PW,Wall (Put Wall)~L↑: 24604.7~L↓: 24595.3~Range: 9pt~Call: 2.83M~Put: 16.07M;24980,1,0,24984.3,24975.7,PW,Wall (Put Wall)~L↑: 24984.3~L↓: 24975.7~Range: 9pt~Call: 3.27M~Put: 7.39M;24960,1,0,24964.2,24955.8,PW,Wall (Put Wall)~L↑: 24964.2~L↓: 24955.8~Range: 8pt~Call: 3.23M~Put: 6.26M;24830,1,0,24834.1,24825.9,PW,Wall (Put Wall)~L↑: 24834.1~L↓: 24825.9~Range: 8pt~Call: 3.48M~Put: 5.89M;25010,1,1,25014.1,25005.9,CW,Magnet (Attractor)~L↑: 25014.1~L↓: 25005.9~Range: 8pt~Call: 4.36M~Put: 4.25M;25020,1,1,25024.0,25016.0,PW,Magnet (Attractor)~L↑: 25024.0~L↓: 25016.0~Range: 8pt~Call: 3.28M~Put: 4.24M;25090,1,0,25093.9,25086.1,CW,Wall (Call Wall)~L↑: 25093.9~L↓: 25086.1~Range: 8pt~Call: 4.96M~Put: 1.94M;24927,0,0,24927,24927,ZG,Zero Gamma~Key pivot where dealer gamma flips`;
+
+let currentInstrument='NQ';
+let lastLevels=[];
+let selectedStrikes=new Set();
+let lastClickedIdx=-1;
+let undoData=null; // {raw, levels} for undo clear
+
+// ── Parse ──────────────────────────────────────────
+function parseGex(raw){
+  const out=[];
+  for(const e of raw.trim().split(';')){
+    const p=e.split(',');
+    if(p.length<6)continue;
+    const strike=parseFloat(p[0]),strength=parseInt(p[1]),isMagnet=parseInt(p[2])===1;
+    const upper=parseFloat(p[3]),lower=parseFloat(p[4]),typeCode=p[5];
+    // Extract call/put from extra fields if present
+    let callVal='—',putVal='—',rangeVal='—';
+    if(p.length>6){
+      const extra=p.slice(6).join(',');
+      const cm=extra.match(/Call:\s*([\d.]+[MK]?)/i);
+      const pm=extra.match(/Put:\s*([\d.]+[MK]?)/i);
+      const rm=extra.match(/Range:\s*(\d+pt)/i);
+      if(cm)callVal='$'+cm[1];
+      if(pm)putVal='$'+pm[1];
+      if(rm)rangeVal=rm[1];
+    }
+    let kind=typeCode;
+    if(typeCode==='CW'&&isMagnet)kind='CW-MAG';
+    if(typeCode==='PW'&&isMagnet)kind='PW-MAG';
+    if(typeCode==='ZG')kind='ZG';
+    out.push({strike,strength,upper,lower,isMagnet,kind,callVal,putVal,rangeVal});
+  }
+  return out;
+}
+
+function filteredLevels(levels){
+  const min=parseInt(document.getElementById('minStrength').value);
+  return levels.filter(l=>l.kind==='ZG'||l.strength>=min);
+}
+
+// ── Color ──────────────────────────────────────────
+const C_MAG='#00e5c8',C_WALL='#ff4d8d',C_ZG='#4a5878';
+function getColor(l){if(l.kind==='ZG')return C_ZG;return l.isMagnet?C_MAG:C_WALL;}
+function hexToRgb(h){const x=h.replace('#','');return{r:parseInt(x.slice(0,2),16),g:parseInt(x.slice(2,4),16),b:parseInt(x.slice(4,6),16)}}
+function rgbToHex(r,g,b){return'#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase()}
+function blend(base,t){const f=Math.max(0,Math.min(100,t))/100,fg=hexToRgb(base),bg=hexToRgb(document.getElementById('bgColor').value);return rgbToHex(fg.r+(bg.r-fg.r)*f,fg.g+(bg.g-fg.g)*f,fg.b+(bg.b-fg.b)*f)}
+function makeLabel(l){if(l.kind==='ZG')return'◆ ZG';return l.strike+(l.isMagnet?' MAGNET':' WALL')}
+function getBand(l){
+  if(l.kind==='ZG')return{price:l.strike,offset:0};
+  const fh=((l.upper-l.lower)/2)*parseFloat(document.getElementById('fieldScale').value);
+  return{price:l.strike,offset:parseFloat((fh*2).toFixed(2))};
+}
+
+// ── CSV ────────────────────────────────────────────
+function toCSV(levels){
+  const rows=['Symbol,Price,Label,Text Color,Line Color,Band Color,Band Offset,Show Label,Show Price'];
+  const gOn=document.getElementById('gradientEnabled').checked;
+  const aO=parseInt(document.getElementById('alphaOuter').value);
+  const aI=parseInt(document.getElementById('alphaInner').value);
+  const sL=document.getElementById('showCenterLabel').checked;
+  const sE=document.getElementById('showBandEdges').checked;
+  for(const l of levels){
+    const col=getColor(l),lbl=sL?makeLabel(l):' ';
+    const{price,offset:bo}=getBand(l),fh=bo/2;
+    if(l.kind==='ZG'){
+      const c=gOn?blend(col,20):col;
+      rows.push(`${currentInstrument},${price},${lbl},#FFFFFF,${c},${c},0,${sL},false`);
+      continue;
+    }
+    if(!gOn){
+      rows.push(`${currentInstrument},${price},${lbl},#FFFFFF,${col},${col},${bo},${sL},false`);
+      if(sE){const ec=blend(col,60);rows.push(`${currentInstrument},${(price+fh).toFixed(2)}, ,#FFFFFF,${ec},${ec},0,false,true`);rows.push(`${currentInstrument},${(price-fh).toFixed(2)}, ,#FFFFFF,${ec},${ec},0,false,true`);}
+      continue;
+    }
+    const N=parseInt(document.getElementById('gradientSteps').value);
+    const adj=Math.max(10,aI-(l.strength-1)*5),sh=fh/N;
+    for(let i=0;i<N;i++){
+      const tM=((i/N)**2+((i+1)/N)**2)/2,a=adj+(aO-adj)*tM,c=blend(col,a);
+      rows.push(`${currentInstrument},${(price+sh*(i+.5)).toFixed(3)}, ,#FFFFFF,${c},${c},${sh.toFixed(3)},false,${(i===N-1&&sE)?'true':'false'}`);
+    }
+    for(let i=0;i<N;i++){
+      const tM=((i/N)**2+((i+1)/N)**2)/2,a=adj+(aO-adj)*tM,c=blend(col,a);
+      rows.push(`${currentInstrument},${(price-sh*(i+.5)).toFixed(3)}, ,#FFFFFF,${c},${c},${sh.toFixed(3)},false,${(i===N-1&&sE)?'true':'false'}`);
+    }
+    const cc=blend(col,Math.max(0,adj-25));
+    rows.push(`${currentInstrument},${price},${lbl},#FFFFFF,${cc},${cc},0,${sL},false`);
+  }
+  return rows.join('\n');
+}
+
+// ── Animated counter ───────────────────────────────
+function animateCount(el,target,color){
+  const start=0,dur=600,startTime=performance.now();
+  function step(now){
+    const p=Math.min((now-startTime)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(start+(target-start)*ease);
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=target;
+  }
+  requestAnimationFrame(step);
+}
+
+// ── Tooltip ────────────────────────────────────────
+const tip=document.getElementById?document.getElementById('tip'):null;
+function showTip(e,l){
+  if(!tip)return;
+  const isWall=!l.isMagnet&&l.kind!=='ZG';
+  const isMag=l.isMagnet;
+  const isZG=l.kind==='ZG';
+  const typeLabel=isZG?'Zero Gamma':isMag?'Magnet':'Wall';
+  const typeCol=isZG?'fog':isMag?'cyan':'pink';
+  tip.innerHTML=`
+    <div class="tip-strike">${l.strike}</div>
+    <div class="tip-row"><span class="tip-lbl">Type</span><span class="tip-val ${typeCol}">${typeLabel}</span></div>
+    <div class="tip-row"><span class="tip-lbl">Strength</span><span class="tip-val amber">${'█'.repeat(l.strength)}${'░'.repeat(5-l.strength)}</span></div>
+    ${!isZG?`<div class="tip-row"><span class="tip-lbl">Range</span><span class="tip-val">${l.rangeVal}</span></div>
+    <div class="tip-row"><span class="tip-lbl">Call $</span><span class="tip-val cyan">${l.callVal}</span></div>
+    <div class="tip-row"><span class="tip-lbl">Put $</span><span class="tip-val pink">${l.putVal}</span></div>`:''}
+  `;
+  moveTip(e);
+  tip.classList.add('show');
+}
+function moveTip(e){
+  if(!tip)return;
+  const x=e.clientX+14,y=e.clientY-10;
+  const tw=tip.offsetWidth||180;
+  tip.style.left=(x+tw>window.innerWidth?x-tw-20:x)+'px';
+  tip.style.top=y+'px';
+}
+function hideTip(){ if(tip)tip.classList.remove('show'); }
+
+// ── Main parse ─────────────────────────────────────
+function parse(){
+  const raw=document.getElementById('rawInput').value.trim();
+  if(!raw)return;
+  lastLevels=parseGex(raw);
+  if(!lastLevels.length)return;
+  const levels=filteredLevels(lastLevels);
+
+  const walls=levels.filter(l=>!l.isMagnet&&l.kind!=='ZG').length;
+  const magnets=levels.filter(l=>l.isMagnet).length;
+  const N=parseInt(document.getElementById('gradientSteps').value);
+  const gOn=document.getElementById('gradientEnabled').checked;
+  const sE=document.getElementById('showBandEdges').checked;
+  const csvRows=levels.reduce((a,l)=>{
+    if(l.kind==='ZG')return a+1;
+    if(!gOn)return a+1+(sE?2:0);
+    return a+N*2+1;
+  },1);
+
+  // Animated stat counters
+  const statsBar=document.getElementById('statsBar');
+  statsBar.style.display='grid';
+  statsBar.classList.remove('panel-animate');
+  void statsBar.offsetWidth;
+  statsBar.classList.add('panel-animate');
+  animateCount(document.getElementById('statTotal'),levels.length);
+  animateCount(document.getElementById('statWalls'),walls);
+  animateCount(document.getElementById('statMagnets'),magnets);
+  animateCount(document.getElementById('statRows'),csvRows);
+
+  // Table
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  selectedStrikes=new Set();
+  updateSelBar();
+  const levelsList=levels;
+  for(let idx=0;idx<levelsList.length;idx++){
+    const l=levelsList[idx];
+    const{price,offset:bo}=getBand(l);
+    const segs=[1,2,3,4,5].map(i=>`<div class="str-seg${i<=l.strength?' on':''}"></div>`).join('');
+    const tc=l.kind==='ZG'?'badge-zg':l.isMagnet?'badge-mag':'badge-wall';
+    const tt=l.isMagnet?'MAG':l.kind==='ZG'?'ZG':'WALL';
+    const rowClass=l.kind==='ZG'?'row-zg':l.isMagnet?'row-mag':'row-wall';
+    const tr=document.createElement('tr');
+    tr.className=rowClass;
+    tr.dataset.idx=idx;
+    tr.dataset.strike=l.strike;
+    tr.dataset.kind=l.kind;
+    tr.innerHTML=`<td class="strike-cell">${l.strike}</td><td><span class="badge ${tc}">${tt}</span></td><td><div class="str-bar">${segs}</div></td><td style="color:var(--text2)">${(price+bo/2).toFixed(1)}</td><td style="color:var(--text2)">${(price-bo/2).toFixed(1)}</td><td style="color:var(--text3);font-size:10px">${makeLabel(l)}</td>`;
+
+    // Tooltip events on the row (not strike cell)
+    tr.addEventListener('mouseenter', e=>showTip(e,l));
+    tr.addEventListener('mousemove',  e=>moveTip(e));
+    tr.addEventListener('mouseleave', hideTip);
+
+    // Strike cell: click to copy, stop row-select propagation
+    tr.querySelector('.strike-cell').addEventListener('click',function(e){
+      e.stopPropagation();
+      navigator.clipboard.writeText(l.strike.toString()).then(()=>showToast('Strike '+l.strike+' copied'));
+    });
+
+    // Row click = select/deselect
+    tr.addEventListener('click',function(e){
+      const i=parseInt(this.dataset.idx);
+      if(e.shiftKey&&lastClickedIdx>=0){
+        const lo=Math.min(i,lastClickedIdx),hi=Math.max(i,lastClickedIdx);
+        const rows=tbody.querySelectorAll('tr');
+        const allSel=[...rows].slice(lo,hi+1).every(r=>selectedStrikes.has(r.dataset.strike));
+        for(let j=lo;j<=hi;j++){
+          const r=rows[j];
+          allSel?selectedStrikes.delete(r.dataset.strike):selectedStrikes.add(r.dataset.strike);
+          r.classList.toggle('sel',!allSel);
+        }
+      } else {
+        const key=this.dataset.strike;
+        if(selectedStrikes.has(key)){selectedStrikes.delete(key);this.classList.remove('sel');}
+        else{selectedStrikes.add(key);this.classList.add('sel');}
+      }
+      lastClickedIdx=i;
+      updateSelBar();
+    });
+    tbody.appendChild(tr);
+  }
+
+  // Show type-select row
+  document.getElementById('typeSelRow').style.display='flex';
+
+  const tableSection=document.getElementById('tableSection');
+  tableSection.style.display='';
+  tableSection.classList.remove('panel-animate');
+  void tableSection.offsetWidth;
+  tableSection.classList.add('panel-animate');
+  document.getElementById('levelCount').textContent=`(${levels.length})`;
+
+  const outputSection=document.getElementById('outputSection');
+  document.getElementById('outputBox').textContent=toCSV(levels);
+  outputSection.style.display='';
+  outputSection.classList.remove('panel-animate');
+  void outputSection.offsetWidth;
+  outputSection.classList.add('panel-animate');
+
+  // Pulse copy button to signal new output
+  pulseCopyBtn();
+}
+
+function reparse(){
+  if(lastLevels.length)parse();
+  else if(document.getElementById('rawInput').value.trim())parse();
+}
+
+// ── Helpers ────────────────────────────────────────
+function setInstrument(n,btn){currentInstrument=n;document.querySelectorAll('.inst-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');reparse();}
+
+function setBg(hex,btn){
+  document.getElementById('bgColor').value=hex;
+  document.getElementById('bgHexLabel').textContent=hex;
+  document.querySelectorAll('.swatch').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  reparse();
+}
+
+function showToast(msg,undoFn){
+  const t=document.getElementById('toast');
+  t.innerHTML='✓ '+msg+(undoFn?'&nbsp;&nbsp;<span style="text-decoration:underline;cursor:pointer;opacity:0.7" onclick="('+undoFn.toString()+')()">Undo</span>':'');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),undoFn?4000:2400);
+}
+
+function pulseCopyBtn(){
+  const btn=document.getElementById('copyCsvBtn');
+  if(!btn)return;
+  btn.classList.remove('btn-copy-pulse');
+  void btn.offsetWidth;
+  btn.classList.add('btn-copy-pulse');
+}
+
+function copyOutput(){
+  navigator.clipboard.writeText(document.getElementById('outputBox').textContent)
+    .then(()=>showToast('CSV copied to clipboard'));
+}
+
+function copyUrl(){
+  const v=document.getElementById('urlInput').value.trim();
+  if(!v){showToast('No URL entered');return;}
+  navigator.clipboard.writeText(v).then(()=>showToast('URL copied'));
+}
+
+function exportCSV(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([document.getElementById('outputBox').textContent],{type:'text/csv'}));
+  a.download=`gex-${currentInstrument}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();showToast('CSV downloaded');
+}
+
+function loadSample(){document.getElementById('rawInput').value=SAMPLE;parse();}
+
+function clearAll(){
+  const savedRaw=document.getElementById('rawInput').value;
+  const savedLevels=[...lastLevels];
+  undoData={raw:savedRaw,levels:savedLevels};
+
+  document.getElementById('rawInput').value='';
+  lastLevels=[];
+  selectedStrikes=new Set();
+  lastClickedIdx=-1;
+  ['tableSection','outputSection','statsBar'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('outputBox').textContent='';
+  document.getElementById('csvModeTag').classList.remove('visible');
+  document.getElementById('typeSelRow').style.display='none';
+
+  if(savedRaw){
+    showToast('Cleared',function undoClear(){
+      if(!undoData)return;
+      document.getElementById('rawInput').value=undoData.raw;
+      lastLevels=undoData.levels;
+      parse();
+      undoData=null;
+    });
+  }
+}
+
+function toggleColl(bodyId,btnId){
+  const body=document.getElementById(bodyId),btn=document.getElementById(btnId);
+  const shut=body.classList.contains('shut');
+  body.classList.toggle('shut',!shut);
+  btn.textContent=shut?'▲ hide':'▼ show';
+}
+
+function updateSelBar(){
+  const n=selectedStrikes.size;
+  const bar=document.getElementById('selBar');
+  document.getElementById('selCount').textContent=n;
+  bar.classList.toggle('visible',n>0);
+  // Live-update CSV output
+  const allLevels=filteredLevels(lastLevels);
+  if(n>0){
+    const sel=allLevels.filter(l=>selectedStrikes.has(String(l.strike)));
+    document.getElementById('outputBox').textContent=toCSV(sel);
+    document.getElementById('csvModeTag').classList.add('visible');
+  } else {
+    document.getElementById('outputBox').textContent=toCSV(allLevels);
+    document.getElementById('csvModeTag').classList.remove('visible');
+  }
+  pulseCopyBtn();
+}
+
+function clearSelection(){
+  selectedStrikes=new Set();
+  lastClickedIdx=-1;
+  document.querySelectorAll('#tbody tr.sel').forEach(r=>r.classList.remove('sel'));
+  updateSelBar();
+}
+
+function selectByType(type){
+  const rows=document.querySelectorAll('#tbody tr');
+  selectedStrikes=new Set();
+  rows.forEach(r=>{
+    const kind=r.dataset.kind;
+    let match=false;
+    if(type==='all')   match=true;
+    if(type==='none')  match=false;
+    if(type==='wall')  match=kind!=='ZG'&&!['CW-MAG','PW-MAG'].includes(kind);
+    if(type==='mag')   match=kind==='CW-MAG'||kind==='PW-MAG';
+    if(type==='zg')    match=kind==='ZG';
+    r.classList.toggle('sel',match);
+    if(match)selectedStrikes.add(r.dataset.strike);
+  });
+  lastClickedIdx=-1;
+  updateSelBar();
+}
+
+function exportSelectionOnly(){
+  if(!selectedStrikes.size)return;
+  const csv=document.getElementById('outputBox').textContent;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`gex-${currentInstrument}-selection-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast(`Downloaded ${selectedStrikes.size} selected level${selectedStrikes.size!==1?'s':''}`);
+}
+
+window.onload=loadSample;
+</script>
+</body>
+</html>
